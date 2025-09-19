@@ -1,0 +1,124 @@
+{
+    "rows": [
+        {
+            "cells": [
+                {
+                    "text": "Employee ID",
+                    "color": "#006400"
+                },
+                {
+                    "text": "Name",
+                    "color": "#006400"
+                },
+                {
+                    "text": "Department",
+                    "color": "#006400"
+                },
+                {
+                    "text": "Performance Score",
+                    "color": "#006400"
+                }
+            ]
+        },
+        {
+            "cells": [
+                {
+                    "text": "E1024",
+                    "color": "#D3D3D3"
+                },
+                {
+                    "text": "Alice",
+                    "color": "#D3D3D3"
+                },
+                {
+                    "text": "Marketing",
+                    "color": "#D3D3D3"
+                },
+                {
+                    "text": "9.2",
+                    "color": "#D3D3D3"
+                }
+            ]
+        },
+        {
+            "cells": [
+                {
+                    "text": "E1025",
+                    "color": "#FFFFFF"
+                },
+                {
+                    "text": "Bob",
+                    "color": "#FFFFFF"
+                },
+                {
+                    "text": "Engineering",
+                    "color": "#FFFFFF"
+                },
+                {
+                    "text": "8.5",
+                    "color": "#FFFFFF"
+                }
+            ]
+        },
+        {
+            "cells": [
+                {
+                    "text": "E1026",
+                    "color": "#D3D3D3"
+                },
+                {
+                    "text": "Charlie",
+                    "color": "#D3D3D3"
+                },
+                {
+                    "text": "Marketing",
+                    "color": "#D3D3D3"
+                },
+                {
+                    "text": "9.5",
+                    "color": "#D3D3D3"
+                }
+            ]
+        },
+        {
+            "cells": [
+                {
+                    "text": "E1027",
+                    "color": "#FFFFFF"
+                },
+                {
+                    "text": "Diana",
+                    "color": "#FFFFFF"
+                },
+                {
+                    "text": "Sales",
+                    "color": "#FFFFFF"
+                },
+                {
+                    "text": "8.9",
+                    "color": "#FFFFFF"
+                }
+            ]
+        },
+        {
+            "cells": [
+                {
+                    "text": "E1028",
+                    "color": "#D3D3D3"
+                },
+                {
+                    "text": "Eve",
+                    "color": "#D3D3D3"
+                },
+                {
+                    "text": "Engineering",
+                    "color": "#D3D3D3"
+                },
+                {
+                    "text": "9.1",
+                    "color": "#D3D3D3"
+                }
+            ]
+        }
+    ]
+}
