@@ -106,15 +106,31 @@ if __name__ == "__main__":
     pdf_file = sys.argv[1]
 
     try:
+        # Check if the file exists before processing
         with open(pdf_file, "rb"):
             pass
     except FileNotFoundError:
-        print(f"Error: '{pdf_file}' not found.")
+        print(f"Error: PDF file not found at '{pdf_file}'")
         sys.exit(1)
 
     try:
         extracted_data = extract_tables_from_pdf(pdf_file)
-        print(json.dumps(extracted_data, indent=2))
+
+        table_counter = 1
+        # Iterate through each page's data
+        for page_data in extracted_data:
+            # Iterate through each table found on the page
+            for table in page_data['tables']:
+                # Define the output filename
+                output_filename = f"table_{table_counter}.json"
+
+                # Write the table data to a JSON file
+                with open(output_filename, 'w') as json_file:
+                    json.dump(table, json_file, indent=4)
+
+                print(f"Successfully saved page {page_data['page']}'s table to {output_filename}")
+                table_counter += 1
+
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred during table extraction or file writing: {e}")
         sys.exit(1)
