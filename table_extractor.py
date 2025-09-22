@@ -18,8 +18,7 @@ def find_cell_color(rect, drawings):
 def extract_tables_from_pdf(pdf_path):
     """
     Extracts tables from a PDF using PyMuPDF by manually reconstructing
-    tables from text blocks and colored rectangles. Can detect multiple
-    tables on a single page based on vertical spacing.
+    tables from text blocks and colored rectangles.
     """
     doc = fitz.open(pdf_path)
     all_page_tables = []
@@ -34,7 +33,7 @@ def extract_tables_from_pdf(pdf_path):
         if not words:
             continue
 
-        # Group words into lines based on vertical position
+        # Group words into lines
         words.sort(key=lambda w: (w[1], w[0]))
         lines = {}
         for w in words:
@@ -48,7 +47,7 @@ def extract_tables_from_pdf(pdf_path):
             if not found_line:
                 lines[y0] = [w]
 
-        # Group words on each line into cells based on horizontal position
+        # Group words on each line into cells
         cells = []
         for y_key in sorted(lines.keys()):
             line_words = sorted(lines[y_key], key=lambda w: w[0])
@@ -56,9 +55,11 @@ def extract_tables_from_pdf(pdf_path):
 
             current_cell_text = [line_words[0][4]]
             current_cell_bbox = fitz.Rect(line_words[0][:4])
+
             for i in range(1, len(line_words)):
                 prev_word_bbox = fitz.Rect(line_words[i-1][:4])
                 current_word_bbox = fitz.Rect(line_words[i][:4])
+
                 if abs(current_word_bbox.x0 - prev_word_bbox.x1) < 5:
                     current_cell_text.append(line_words[i][4])
                     current_cell_bbox.include_rect(current_word_bbox)
@@ -78,59 +79,21 @@ def extract_tables_from_pdf(pdf_path):
             y_center = (cell['rect'].y0 + cell['rect'].y1) / 2
             found_row = False
             for y_key in rows.keys():
-                if abs(y_key - y_center) < 10: # Row tolerance
+                if abs(y_key - y_center) < 10:
                     rows[y_key].append(cell)
                     found_row = True
                     break
             if not found_row:
                 rows[y_center] = [cell]
 
-        if not rows:
-            all_page_tables.append(page_tables_data)
-            continue
+        table_data = {"rows": []}
+        for y_key in sorted(rows.keys()):
+            row = rows[y_key]
+            row.sort(key=lambda c: c['rect'].x0)
+            row_cells = [{"text": c['text'], "color": c['color']} for c in row]
+            table_data["rows"].append({"cells": row_cells})
 
-        # Identify tables based on vertical gaps between rows
-        sorted_y_keys = sorted(rows.keys())
-
-        # Calculate the bounding box for each row by taking the union of its cells
-        row_bboxes = {}
-        for y_key in sorted_y_keys:
-            row_bbox = fitz.Rect()
-            for cell in rows[y_key]:
-                row_bbox |= cell['rect']
-            row_bboxes[y_key] = row_bbox
-
-        tables_on_page = []
-        current_table_rows_y = []
-        for i, y_key in enumerate(sorted_y_keys):
-            current_table_rows_y.append(y_key)
-            if i + 1 < len(sorted_y_keys):
-                current_row_bbox = row_bboxes[y_key]
-                next_y_key = sorted_y_keys[i+1]
-                next_row_bbox = row_bboxes[next_y_key]
-                vertical_gap = next_row_bbox.y0 - current_row_bbox.y1
-
-                if vertical_gap > 20: # Threshold for table break
-                    # Only consider blocks with more than one row as a table
-                    if len(current_table_rows_y) > 1:
-                        table_data = {"rows": []}
-                        for row_y in current_table_rows_y:
-                            row = sorted(rows[row_y], key=lambda c: c['rect'].x0)
-                            row_cells = [{"text": c['text'], "color": c['color']} for c in row]
-                            table_data["rows"].append({"cells": row_cells})
-                        tables_on_page.append(table_data)
-                    current_table_rows_y = []
-
-        # Add the last table if it has more than one row
-        if len(current_table_rows_y) > 1:
-            table_data = {"rows": []}
-            for row_y in current_table_rows_y:
-                row = sorted(rows[row_y], key=lambda c: c['rect'].x0)
-                row_cells = [{"text": c['text'], "color": c['color']} for c in row]
-                table_data["rows"].append({"cells": row_cells})
-            tables_on_page.append(table_data)
-
-        page_tables_data["tables"] = tables_on_page
+        page_tables_data["tables"].append(table_data)
         all_page_tables.append(page_tables_data)
 
     return all_page_tables
@@ -143,31 +106,15 @@ if __name__ == "__main__":
     pdf_file = sys.argv[1]
 
     try:
-        # Check if the file exists before processing
         with open(pdf_file, "rb"):
             pass
     except FileNotFoundError:
-        print(f"Error: PDF file not found at '{pdf_file}'")
+        print(f"Error: '{pdf_file}' not found.")
         sys.exit(1)
 
     try:
         extracted_data = extract_tables_from_pdf(pdf_file)
-
-        table_counter = 1
-        # Iterate through each page's data
-        for page_data in extracted_data:
-            # Iterate through each table found on the page
-            for table in page_data['tables']:
-                # Define the output filename
-                output_filename = f"table_{table_counter}.json"
-
-                # Write the table data to a JSON file
-                with open(output_filename, 'w') as json_file:
-                    json.dump(table, json_file, indent=4)
-
-                print(f"Successfully saved page {page_data['page']}'s table to {output_filename}")
-                table_counter += 1
-
+        print(json.dumps(extracted_data, indent=2))
     except Exception as e:
-        print(f"An error occurred during table extraction or file writing: {e}")
+        print(f"An error occurred: {e}")
         sys.exit(1)
